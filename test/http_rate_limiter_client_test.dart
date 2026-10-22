@@ -34,11 +34,15 @@ import 'package:test/test.dart';
   return (client: client, times: times);
 }
 
-Uri _uri(String path, {String host = 'example.com'}) => Uri.parse('https://$host$path');
+Uri _uri(String path, {String host = 'example.com'}) =>
+    Uri.parse('https://$host$path');
 
 void main() {
   test('lets a burst through and delays the rest', () async {
-    final (:client, :times) = _build(bucketSize: 3, interval: const Duration(milliseconds: 100), tokensPerInterval: 1);
+    final (:client, :times) = _build(
+        bucketSize: 3,
+        interval: const Duration(milliseconds: 100),
+        tokensPerInterval: 1);
 
     await Future.wait([for (var i = 0; i < 4; i++) client.get(_uri('/a'))]);
 
@@ -49,7 +53,10 @@ void main() {
   });
 
   test('convenience methods such as post and read are limited too', () async {
-    final (:client, :times) = _build(bucketSize: 1, interval: const Duration(milliseconds: 100), tokensPerInterval: 1);
+    final (:client, :times) = _build(
+        bucketSize: 1,
+        interval: const Duration(milliseconds: 100),
+        tokensPerInterval: 1);
 
     await client.post(_uri('/a'), body: 'x');
     await client.read(_uri('/b'));
@@ -93,22 +100,31 @@ void main() {
   });
 
   test('throws RateLimitOverflowException when the queue is full', () async {
-    final (:client, :times) = _build(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1, maxQueueSize: 0);
+    final (:client, :times) = _build(
+        bucketSize: 1,
+        interval: const Duration(seconds: 10),
+        tokensPerInterval: 1,
+        maxQueueSize: 0);
 
     await client.get(_uri('/a'));
 
-    await expectLater(client.get(_uri('/b')), throwsA(isA<RateLimitOverflowException>()));
+    await expectLater(
+        client.get(_uri('/b')), throwsA(isA<RateLimitOverflowException>()));
     expect(times, hasLength(1));
     client.close();
   });
 
   test('an abortable request aborted while queued is never sent', () async {
-    final (:client, :times) = _build(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1);
+    final (:client, :times) = _build(
+        bucketSize: 1,
+        interval: const Duration(seconds: 10),
+        tokensPerInterval: 1);
 
     await client.get(_uri('/a'));
 
     final abort = Completer<void>();
-    final future = client.send(http.AbortableRequest('GET', _uri('/b'), abortTrigger: abort.future));
+    final future = client.send(
+        http.AbortableRequest('GET', _uri('/b'), abortTrigger: abort.future));
     await Future<void>.delayed(const Duration(milliseconds: 20));
     abort.complete();
 
@@ -119,7 +135,8 @@ void main() {
 
   test('shared bucket is not disposed when the client is closed', () async {
     final bucket = TokenBucket(bucketSize: 2);
-    final client = HttpRateLimiterClient.shared(bucket, inner: MockClient((_) async => http.Response('ok', 200)));
+    final client = HttpRateLimiterClient.shared(bucket,
+        inner: MockClient((_) async => http.Response('ok', 200)));
 
     client.close();
 

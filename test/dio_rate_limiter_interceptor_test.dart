@@ -10,7 +10,8 @@ class _RecordingAdapter implements HttpClientAdapter {
   final List<int> times = <int>[];
 
   @override
-  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+  Future<ResponseBody> fetch(RequestOptions options,
+      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
     times.add(_clock.elapsedMilliseconds);
     return ResponseBody.fromString('ok', 200);
   }
@@ -29,7 +30,12 @@ Dio _dioWith(DioRateLimiterInterceptor interceptor, _RecordingAdapter adapter) {
 void main() {
   test('lets a burst through and delays the rest', () async {
     final adapter = _RecordingAdapter();
-    final dio = _dioWith(DioRateLimiterInterceptor(bucketSize: 3, interval: const Duration(milliseconds: 100), tokensPerInterval: 1), adapter);
+    final dio = _dioWith(
+        DioRateLimiterInterceptor(
+            bucketSize: 3,
+            interval: const Duration(milliseconds: 100),
+            tokensPerInterval: 1),
+        adapter);
 
     await Future.wait([for (var i = 0; i < 4; i++) dio.get<String>('/a')]);
 
@@ -61,7 +67,11 @@ void main() {
   test('bucketKey gives each key its own bucket', () async {
     final adapter = _RecordingAdapter();
     final dio = _dioWith(
-      DioRateLimiterInterceptor(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1, bucketKey: (options) => options.path),
+      DioRateLimiterInterceptor(
+          bucketSize: 1,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1,
+          bucketKey: (options) => options.path),
       adapter,
     );
 
@@ -72,22 +82,35 @@ void main() {
     expect(adapter.times.last, lessThan(500));
   });
 
-  test('rejects with RateLimitOverflowException when the queue is full', () async {
+  test('rejects with RateLimitOverflowException when the queue is full',
+      () async {
     final adapter = _RecordingAdapter();
     final dio = _dioWith(
-      DioRateLimiterInterceptor(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1, maxQueueSize: 0),
+      DioRateLimiterInterceptor(
+          bucketSize: 1,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1,
+          maxQueueSize: 0),
       adapter,
     );
 
     await dio.get<String>('/a');
 
-    await expectLater(dio.get<String>('/b'), throwsA(isA<DioException>().having((e) => e.error, 'error', isA<RateLimitOverflowException>())));
+    await expectLater(
+        dio.get<String>('/b'),
+        throwsA(isA<DioException>().having(
+            (e) => e.error, 'error', isA<RateLimitOverflowException>())));
     expect(adapter.times, hasLength(1));
   });
 
   test('a request cancelled while queued is never sent', () async {
     final adapter = _RecordingAdapter();
-    final dio = _dioWith(DioRateLimiterInterceptor(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1), adapter);
+    final dio = _dioWith(
+        DioRateLimiterInterceptor(
+            bucketSize: 1,
+            interval: const Duration(seconds: 10),
+            tokensPerInterval: 1),
+        adapter);
 
     await dio.get<String>('/a');
 
@@ -96,7 +119,10 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 20));
     cancelToken.cancel('changed my mind');
 
-    await expectLater(future, throwsA(isA<DioException>().having((e) => e.type, 'type', DioExceptionType.cancel)));
+    await expectLater(
+        future,
+        throwsA(isA<DioException>()
+            .having((e) => e.type, 'type', DioExceptionType.cancel)));
     expect(adapter.times, hasLength(1));
   });
 

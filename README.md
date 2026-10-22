@@ -1,4 +1,4 @@
-# request_rate_limiter
+# Request Rate Limiter
 
 A **token-bucket rate limiter** for Dart and Flutter HTTP clients, with ready-made
 adapters for [Dio](https://pub.dev/packages/dio) and

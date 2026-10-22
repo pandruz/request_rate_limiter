@@ -10,7 +10,11 @@ void main() {
 
     setUp(() {
       now = Duration.zero;
-      bucket = TokenBucket(bucketSize: 4, interval: const Duration(seconds: 1), tokensPerInterval: 2, clock: () => now);
+      bucket = TokenBucket(
+          bucketSize: 4,
+          interval: const Duration(seconds: 1),
+          tokensPerInterval: 2,
+          clock: () => now);
     });
 
     tearDown(() => bucket.dispose());
@@ -56,7 +60,10 @@ void main() {
 
   group('TokenBucket (real time)', () {
     test('acquire completes immediately while tokens remain', () async {
-      final bucket = TokenBucket(bucketSize: 3, interval: const Duration(seconds: 10), tokensPerInterval: 1);
+      final bucket = TokenBucket(
+          bucketSize: 3,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1);
       final sw = Stopwatch()..start();
       await bucket.acquire();
       await bucket.acquire();
@@ -66,7 +73,10 @@ void main() {
     });
 
     test('acquire waits for a refill when empty', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(milliseconds: 100), tokensPerInterval: 1);
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(milliseconds: 100),
+          tokensPerInterval: 1);
       await bucket.acquire();
       final sw = Stopwatch()..start();
       await bucket.acquire();
@@ -75,36 +85,55 @@ void main() {
     });
 
     test('serves waiters in FIFO order', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(milliseconds: 50), tokensPerInterval: 1);
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(milliseconds: 50),
+          tokensPerInterval: 1);
       await bucket.acquire();
 
       final order = <int>[];
-      await Future.wait([for (var i = 0; i < 4; i++) bucket.acquire().then((_) => order.add(i))]);
+      await Future.wait([
+        for (var i = 0; i < 4; i++) bucket.acquire().then((_) => order.add(i))
+      ]);
       expect(order, [0, 1, 2, 3]);
       bucket.dispose();
     });
 
-    test('fails with RateLimitOverflowException when the queue is full', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1, maxQueueSize: 1);
+    test('fails with RateLimitOverflowException when the queue is full',
+        () async {
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1,
+          maxQueueSize: 1);
       await bucket.acquire(); // consumes the only token
       final queued = bucket.acquire(); // fills the queue
       expect(bucket.pending, 1);
 
-      await expectLater(bucket.acquire(), throwsA(isA<RateLimitOverflowException>()));
+      await expectLater(
+          bucket.acquire(), throwsA(isA<RateLimitOverflowException>()));
 
       bucket.dispose();
       await expectLater(queued, throwsA(isA<RateLimitCancelledException>()));
     });
 
     test('maxQueueSize 0 fails fast', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1, maxQueueSize: 0);
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1,
+          maxQueueSize: 0);
       await bucket.acquire();
-      await expectLater(bucket.acquire(), throwsA(isA<RateLimitOverflowException>()));
+      await expectLater(
+          bucket.acquire(), throwsA(isA<RateLimitOverflowException>()));
       bucket.dispose();
     });
 
     test('cancelSignal removes the waiter without consuming a token', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(milliseconds: 100), tokensPerInterval: 1);
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(milliseconds: 100),
+          tokensPerInterval: 1);
       await bucket.acquire();
 
       final cancel = Completer<void>();
@@ -123,7 +152,10 @@ void main() {
     });
 
     test('dispose fails waiters and later calls', () async {
-      final bucket = TokenBucket(bucketSize: 1, interval: const Duration(seconds: 10), tokensPerInterval: 1);
+      final bucket = TokenBucket(
+          bucketSize: 1,
+          interval: const Duration(seconds: 10),
+          tokensPerInterval: 1);
       await bucket.acquire();
       final waiting = bucket.acquire();
 
