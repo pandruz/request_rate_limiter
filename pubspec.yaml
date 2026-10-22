@@ -3,7 +3,7 @@ description: >-
   A token-bucket rate limiter for Dio and http. Allows bursts, enforces a
   steady request rate, queues excess requests, and supports per-host limits,
   request costs and cancellation.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/pandruz/request_rate_limiter
 issue_tracker: https://github.com/pandruz/request_rate_limiter/issues
 topics:
@@ -18,7 +18,7 @@ environment:
 
 dependencies:
   dio: ^5.4.0
-  http: ^1.3.0
+  http: ^1.5.0
   meta: ^1.9.0
 
 dev_dependencies:

@@ -205,28 +205,6 @@ await bucket.acquire();          // waits for a token
 if (bucket.tryAcquire()) { ... } // or check without waiting
 ```
 
-## Migrating from Angular + Porro
-
-If you have this in an Angular interceptor:
-
-```typescript
-new Porro({ bucketSize: 10, interval: 500, tokensPerInterval: 2 });
-```
-
-the equivalent is:
-
-```dart
-DioRateLimiterInterceptor(
-  bucketSize: 10,
-  interval: const Duration(milliseconds: 500),
-  tokensPerInterval: 2,
-)
-```
-
-There is no `Bucket overflow` retry loop to write: queued requests simply wait.
-One small difference is that Porro refills in discrete steps each interval,
-while this package refills continuously, which is slightly smoother.
-
 ## Things to know
 
 - **This is a client-side limit.** It protects you from exceeding a server's

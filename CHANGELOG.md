@@ -9,3 +9,7 @@
 - `HttpRateLimiterClient` (`package:request_rate_limiter/http.dart`):
   `http.Client` wrapper with the same features, including support for
   `Abortable` requests.
+
+## 0.2.0
+
+- Fixed http package version in order to comply to pub.dev requirements
