@@ -13,3 +13,7 @@
 ## 0.2.0
 
 - Fixed http package version in order to comply to pub.dev requirements
+
+## 0.3.0
+
+- Fixed ReadMe file

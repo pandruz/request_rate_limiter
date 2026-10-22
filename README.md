@@ -29,7 +29,7 @@ options and behave the same way.
 
 ```yaml
 dependencies:
-  request_rate_limiter: ^0.1.0
+  request_rate_limiter: ^latest_version
 ```
 
 This package depends on both `dio` and `http`, so both are downloaded. Only the
